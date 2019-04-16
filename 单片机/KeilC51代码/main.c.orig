@@ -1,0 +1,201 @@
+#include<reg51.h>
+#include "glocal.h"
+#include "ks0066.h"
+
+sbit LED0=P0^0;
+
+sbit LED1=P0^1;
+
+sbit LED2=P0^2;
+
+sbit LED3=P0^3;
+
+sbit LED4=P0^4;
+
+sbit LED5=P0^5;
+
+sbit LED6=P0^6;
+
+sbit LED7=P0^7;
+
+sbit beep=P2^3;
+
+sbit KEY=P3^2;   //按键
+
+sbit LED8=P0^1;
+
+//LCD管脚定义
+sbit RS=P2^0;     //数据(L)/命令(H)选择
+sbit LCDRW=P2^1;     //写，低电平有效
+sbit EN=P2^2;     //使能,低电平有效
+
+unsigned char flag=0;//无符号字节型（属于整型），占一个字节即八位
+
+//函数声明
+void delay_lcd(char);//延时lcd
+void write_data(char);//写入数据
+void write_com(char);//
+void lcd_init();//lcd初始化
+void delay_ms(char);//延时
+void print_string(char*);//输出字符串函数
+
+//写数据函数
+void write_data(char dat) 
+	
+	{
+    RS=1;          //数据
+    LCDRW=0;        //写
+    DATA_PORT=dat; //把数据送到P口
+    delay_ms(5);      //当晶振较高时加延时
+    EN=1;
+    delay_ms(5);    //当晶振较高时加延时
+    EN=0;          //关使能
+}
+
+//写命令函数
+void write_com(char com) {
+    RS=0;          //命令
+    LCDRW=0;        //写
+    DATA_PORT=com;
+    delay_ms(5);    //当晶振较高时加延时
+    EN=1;
+    delay_ms(5);    //当晶振较高时加延时
+    EN=0;
+}
+
+//1602初始化
+void lcd_init()
+{
+    LCDRW=0;
+    RS=0;
+    write_com(0x36);     //set text home address
+    write_com(0x0f);     //display switch,display on,cursor on,blink on.
+    write_com(0x38);
+    write_com(0x06);     //input set.
+    write_com(0x01);     //screen clear
+    write_com(0x80);    //DDRAM AD set to 00h,
+}
+
+void print_string(char* str) {
+    int i;
+    for(i=0; str[i]!=0; i++)
+    {
+
+        write_data(str[i]);
+    }
+}
+
+//延时函数
+void delay_ms(uchar t) {
+    int j;
+    for(; t!=0; t--)
+        for (j=0; j<255; j++);
+
+}
+
+//定义延时函数
+void mdelay(unsigned int t)
+{
+
+    unsigned char n;
+    for(; t>0; t--)
+        for(n=0; n<125; n++)
+
+        {;}
+}
+//外部中断0函数
+void Initd()interrupt 0
+{
+    if(KEY==0)
+    {
+        flag=1;
+    }
+    else
+    {
+        flag=0;
+    }
+}
+
+//主函数
+void main()
+{
+//		EA=1;//开总中断
+//		  EX0=1;//开外部中断零
+//		  IT0=0;//外部中断边沿触发，下降沿触发
+//		  LED8=1;//先让其灭
+    lcd_init();
+	
+    print_string("HELLO WORLD!");
+    write_com(0xc0);
+    print_string("This is Alex!");
+    LED0=0;
+    LED1=0;
+    LED2=0;
+    LED3=0;
+    LED4=0;
+    LED5=0;
+    LED6=0;
+    LED7=0;
+    while(1)
+    {
+        //跑马灯
+        //1是亮，0是灭
+
+        //LED1=1;//调试用
+
+        LED1=0;
+        LED0=1;
+        mdelay(500);
+        LED0=0;
+        LED1=1;
+        mdelay(500);
+        LED1=0;
+        LED2=1;
+        mdelay(500);
+        LED2=0;
+        LED3=1;
+
+        mdelay(500);
+        LED3=0;
+        LED4=1;
+        mdelay(500);
+        LED4=0;
+        LED5=1;
+
+        mdelay(500);
+        LED5=0;
+        LED6=1;
+        mdelay(500);
+        LED6=0;
+        LED7=1;
+        mdelay(500);
+        LED7=1;
+
+        mdelay(500);
+        LED7=0;
+        //蜂鸣器
+        mdelay(500);
+        beep=0;
+        mdelay(500);
+        beep=1;
+        mdelay(500);
+
+//		  if(flag==1)
+//		  {
+//			  LED8=0;//亮
+//
+//		  }
+//		  else
+//		  {
+//				LED8=1;//灭
+//
+//		  }
+
+
+
+
+
+    }
+
+
+}

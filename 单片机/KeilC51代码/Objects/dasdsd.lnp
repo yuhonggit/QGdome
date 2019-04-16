@@ -1,0 +1,7 @@
+".\Objects\main.obj",
+".\Objects\beep.obj",
+".\Objects\LCD.obj",
+".\Objects\LED.obj",
+".\Objects\delay.obj" 
+TO ".\Objects\dasdsd" 
+PRINT(".\Listings\dasdsd.m51")

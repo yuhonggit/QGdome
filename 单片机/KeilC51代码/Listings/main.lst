@@ -1,0 +1,237 @@
+C51 COMPILER V9.57.0.0   MAIN                                                              04/15/2019 09:33:40 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: E:\mdk\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(.\delay;.\funtion) DEBUG OBJECTEXTEND
+                    - PRINT(.\Listings\main.lst) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<reg51.h>
+   2          #include "lcd1.h"
+   3          #include "lcd2.h"
+   4          #include "delay.h"
+   5          #include "LED.h"
+   6          #include "LCD.h"
+   7          #include "beep.h"
+   8          
+   9          sbit LED0=P0^0;
+  10          
+  11          sbit LED1=P0^1;
+  12          
+  13          sbit LED2=P0^2;
+  14          
+  15          sbit LED3=P0^3;
+  16          
+  17          sbit LED4=P0^4;
+  18          
+  19          sbit LED5=P0^5;
+  20          
+  21          sbit LED6=P0^6;
+  22          
+  23          sbit LED7=P0^7;
+  24          
+  25          sbit beep=P2^3;
+  26          
+  27          sbit KEY=P3^2;   //按键
+  28          
+  29          sbit LED8=P0^1;
+  30          
+  31          //LCD管脚定义
+  32          sbit RS=P2^0;     //数据(L)/命令(H)选择
+  33          sbit LCDRW=P2^1;     //写，低电平有效
+  34          sbit EN=P2^2;     //使能,低电平有效
+  35          
+  36          unsigned char flag=0;//无符号字节型（属于整型），占一个字节即八位
+  37          
+  38          //函数声明
+  39          void delay_lcd(char);//延时lcd
+  40          void write_data(char);//写入数据
+  41          void write_com(char);//
+  42          void lcd_init();//lcd初始化
+  43          void delay_ms(char);//延时
+  44          void print_string(char*);//输出字符串函数
+  45          
+  46          //写数据函数
+  47          void write_data(char dat) 
+  48          {
+  49   1          RS=1;          //数据
+  50   1          LCDRW=0;        //写
+  51   1          DATA_PORT=dat; //把数据送到P口
+  52   1          delay_ms(5);      //当晶振较高时加延时
+  53   1          EN=1;
+  54   1          delay_ms(5);    //当晶振较高时加延时
+C51 COMPILER V9.57.0.0   MAIN                                                              04/15/2019 09:33:40 PAGE 2   
+
+  55   1          EN=0;          //关使能
+  56   1      }
+  57          
+  58          //写命令函数
+  59          void write_com(char com) {
+  60   1          RS=0;          //命令
+  61   1          LCDRW=0;        //写
+  62   1          DATA_PORT=com;
+  63   1          delay_ms(5);    //当晶振较高时加延时
+  64   1          EN=1;
+  65   1          delay_ms(5);    //当晶振较高时加延时
+  66   1          EN=0;
+  67   1      }
+  68          
+  69          //1602初始化
+  70          void lcd_init()
+  71          {
+  72   1          LCDRW=0;
+  73   1          RS=0;
+  74   1          write_com(0x36);     //set text home address
+  75   1          write_com(0x0f);     //display switch,display on,cursor on,blink on.
+  76   1          write_com(0x38);
+  77   1          write_com(0x06);     //input set.
+  78   1          write_com(0x01);     //screen clear
+  79   1          write_com(0x80);    //DDRAM AD set to 00h,
+  80   1      }
+  81          
+  82          void print_string(char* str) {
+  83   1          int i;
+  84   1          for(i=0; str[i]!=0; i++)
+  85   1          {
+  86   2      
+  87   2              write_data(str[i]);
+  88   2          }
+  89   1      }
+  90          
+  91          //延时函数
+  92          void delay_ms(uchar t) {
+  93   1          int j;
+  94   1          for(; t!=0; t--)
+  95   1              for (j=0; j<255; j++);
+  96   1      
+  97   1      }
+  98          
+  99          ////定义延时函数
+ 100          //void mdelay(unsigned int t)
+ 101          //{
+ 102          
+ 103          //    unsigned char n;
+ 104          //    for(; t>0; t--)
+ 105          //        for(n=0; n<125; n++)
+ 106          
+ 107          //        {;}
+ 108          //}
+ 109          
+ 110          //外部中断0函数
+ 111          void Initd()interrupt 0
+ 112          {
+ 113   1          if(KEY==0)
+ 114   1          {
+ 115   2              flag=1;
+ 116   2          }
+C51 COMPILER V9.57.0.0   MAIN                                                              04/15/2019 09:33:40 PAGE 3   
+
+ 117   1          else
+ 118   1          {
+ 119   2              flag=0;
+ 120   2          }
+ 121   1      }
+ 122          
+ 123          //主函数
+ 124          void main()
+ 125          {
+ 126   1      //              EA=1;//开总中断
+ 127   1      //                EX0=1;//开外部中断零
+ 128   1      //                IT0=0;//外部中断边沿触发，下降沿触发
+ 129   1      //                LED8=1;//先让其灭
+ 130   1              void mdelay(unsigned int t);//延时函数1
+ 131   1          lcd_init();
+ 132   1          print_string("This is Hong! ");
+ 133   1          write_com(0xc0);
+ 134   1          print_string("Now time: 23:59");
+ 135   1              //print_string("I can write caixukun");
+ 136   1          LED0=0;
+ 137   1          LED1=0;
+ 138   1          LED2=0;
+ 139   1          LED3=0;
+ 140   1          LED4=0;
+ 141   1          LED5=0;
+ 142   1          LED6=0;
+ 143   1          LED7=0;
+ 144   1          while(1)
+ 145   1          {
+ 146   2              //跑马灯
+ 147   2              //1是亮，0是灭
+ 148   2      
+ 149   2              //LED1=1;//调试用
+ 150   2                      //LED1=0;//调试用
+ 151   2      
+ 152   2              LED1=0;
+ 153   2              LED0=1;
+ 154   2              mdelay(500);
+ 155   2              LED0=0;
+ 156   2              LED1=1;
+ 157   2              mdelay(500);
+ 158   2              LED1=0;
+ 159   2              LED2=1;
+ 160   2              mdelay(500);
+ 161   2              LED2=0;
+ 162   2              LED3=1;
+ 163   2      
+ 164   2              mdelay(500);
+ 165   2              LED3=0;
+ 166   2              LED4=1;
+ 167   2              mdelay(500);
+ 168   2              LED4=0;
+ 169   2              LED5=1;
+ 170   2      
+ 171   2              mdelay(500);
+ 172   2              LED5=0;
+ 173   2              LED6=1;
+ 174   2              mdelay(500);
+ 175   2              LED6=0;
+ 176   2              LED7=1;
+ 177   2              mdelay(500);
+ 178   2              LED7=1;
+C51 COMPILER V9.57.0.0   MAIN                                                              04/15/2019 09:33:40 PAGE 4   
+
+ 179   2      
+ 180   2              mdelay(500);
+ 181   2              LED7=0;
+ 182   2              //蜂鸣器
+ 183   2              mdelay(500);
+ 184   2              beep=0;
+ 185   2              mdelay(500);
+ 186   2              beep=1;
+ 187   2              mdelay(500);
+ 188   2      
+ 189   2      //                if(flag==1)
+ 190   2      //                {
+ 191   2      //                        LED8=0;//亮
+ 192   2      //
+ 193   2      //                }
+ 194   2      //                else
+ 195   2      //                {
+ 196   2      //                              LED8=1;//灭
+ 197   2      //
+ 198   2      //                }
+ 199   2      
+ 200   2      
+ 201   2      
+ 202   2      
+ 203   2      
+ 204   2          }
+ 205   1      
+ 206   1      
+ 207   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    312    ----
+   CONSTANT SIZE    =     31    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
